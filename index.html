@@ -1,0 +1,142 @@
+<head>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.4.2/react.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.4.2/react-dom.js"></script>
+  <script src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.0/jquery-ui.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.21.1/babel.min.js"></script>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+
+<div id="app"></div>
+
+<script type="text/babel">
+
+  const digits = [
+    {
+      value: "one",
+      symbol: 1
+    },
+    {
+      value: "two",
+      symbol: 2
+    },
+    {
+      value: "three",
+      symbol: 3
+    },
+    {
+      value: "four",
+      symbol: 4
+    },
+    {
+      value: "five",
+      symbol: 5
+    },
+    {
+      value: "six",
+      symbol: 6
+    },
+    {
+      value: "seven",
+      symbol: 7
+    },
+    {
+      value: "eight",
+      symbol: 8
+    },
+    {
+      value: "nine",
+      symbol: 9
+    },
+    {
+      value: "zero",
+      symbol: 0
+    }
+    ];
+  const operations = [
+    {
+      op: "add",
+      symbol: "+"
+    },
+    {
+      op: "subtract",
+      symbol: "-"
+    },
+    {
+      op: "multiply",
+      symbol: "*"
+    },
+    {
+      op: "divide",
+      symbol: "/"
+    },
+    {
+      op: "equals",
+      symbol:"="
+    },
+    {
+      op: "decimal",
+      symbol: "."
+    },
+    {
+      op: "clear",
+      symbol: "CLR"
+    }
+  ];
+
+  class NumberPad extends React.Component{
+    constructor(props){
+      super(props);
+    }
+
+    render(){
+      const pad = digits.map(function(digit){
+          <button class="padButton" id={digit.value}>{digit.symbol}</button>
+      });
+
+      return(
+        {pad}
+      )
+    }
+  }
+
+  class OperationPad extends React.Component{
+    constructor(props){
+      super(props);
+    }
+
+    render(){
+      const pad = opIds.map(function(operation){
+        <button class="padButton" id={operation.op}>{operation.symbol}</button>
+      });
+    }
+
+    return(
+      {pad}
+    )
+  }
+
+  class App extends React.Component{
+    constructor(props){
+      super(props){
+        this.state={
+          value: 0,
+          display: "                  ",
+        }
+      }
+
+      render(){
+        <div id="calculator">
+          <div id="display">{this.state.display}</div>
+          <div id="pad">
+            <NumberPad />
+            <OperationPad />
+          </div>
+        </div>
+      }
+    }
+  }
+
+  ReactDOM.render(<App />, document.getElementById("app")){}
+</script>
