@@ -88,15 +88,24 @@
   class NumberPad extends React.Component{
     constructor(props){
       super(props);
+      this.handleNumClick = this.handleNumClick.bind(this);
+    }
+
+    handleNumClick(event){
+      this.props.updateEq(event.target.value);
     }
 
     render(){
       const pad = digits.map(function(digit){
-          <button class="padButton" id={digit.value}>{digit.symbol}</button>
-      });
+        return(
+          <button className="padButton" id={digit.value} key={digit.value} onClick={this.handleNumClick} value={digit.symbol}>{digit.symbol}</button>
+        )
+      },this);
 
       return(
-        {pad}
+        <div id="numberPad">
+          {pad}
+        </div>
       )
     }
   }
@@ -104,39 +113,66 @@
   class OperationPad extends React.Component{
     constructor(props){
       super(props);
+      this.handleOpClick=this.handleOpClick.bind(this);
+    }
+
+    handleOpClick(event){
+      this.props.updateEq(event.target.value)
     }
 
     render(){
-      const pad = opIds.map(function(operation){
-        <button class="padButton" id={operation.op}>{operation.symbol}</button>
-      });
-    }
+      const pad = operations.map(function(operation){
+        return(
+          <button className="padButton" id={operation.op} key={operation.op} onClick={this.handleOpClick} value= {operation.symbol}>{operation.symbol}</button>
+        )
+      },this);
 
-    return(
-      {pad}
-    )
+      return(
+        <div id="operationPad">
+          {pad}
+        </div>
+      )
+    }
   }
 
   class App extends React.Component{
     constructor(props){
-      super(props){
-        this.state={
-          value: 0,
-          display: "                  ",
-        }
+      super(props)
+      this.state={
+        value: 0,
+        equation:[],
+        display: "Display"
       }
+      this.updateEquation = this.updateEquation.bind(this);
+    }
 
-      render(){
+    updateEquation(val){
+      var newEquation = [...this.state.equation, val];
+      this.setState({equation: newEquation});
+    }
+
+    render(){
+      console.log(this.state.equation);
+      return (
         <div id="calculator">
           <div id="display">{this.state.display}</div>
           <div id="pad">
-            <NumberPad />
-            <OperationPad />
+            <NumberPad updateEq={this.updateEquation}/>
+            <OperationPad updateEq={this.updateEquation}/>
           </div>
         </div>
-      }
+      )
     }
   }
 
-  ReactDOM.render(<App />, document.getElementById("app")){}
+  ReactDOM.render(<App />, document.getElementById('app'))
+
+  //logic in words?
+  /*
+    put all ops and numbers into an array.
+    format array into proper format i.e..
+    see clr or = means evaluate
+    see decimal(.) means combine natural numbers to form a real one.
+
+  */
 </script>
