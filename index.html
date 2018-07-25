@@ -12,6 +12,7 @@
 
 <script type="text/babel">
 
+  var decimalMode = false;
   const digits = [
     {
       value: "one",
@@ -147,8 +148,16 @@
     }
 
     updateEquation(val){
-      var newEquation = [...this.state.equation, val];
-      this.setState({equation: newEquation});
+      var newEquation;
+      if(val == "CLR"){
+        this.setState({equation: []});
+      }else{
+        if (val == "."){
+          decimalMode = true;
+        }
+        newEquation = [...this.state.equation, val];
+        this.setState({equation: newEquation});
+      }
     }
 
     render(){
