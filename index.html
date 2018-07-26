@@ -19,39 +19,43 @@
     },
     {
       value: "two",
-      symbol: 2
+      symbol: "2"
     },
     {
       value: "three",
-      symbol: 3
+      symbol: "3"
     },
     {
       value: "four",
-      symbol: 4
+      symbol: "4"
     },
     {
       value: "five",
-      symbol: 5
+      symbol: "5"
     },
     {
       value: "six",
-      symbol: 6
+      symbol: "6"
     },
     {
       value: "seven",
-      symbol: 7
+      symbol: "7"
     },
     {
       value: "eight",
-      symbol: 8
+      symbol: "8"
     },
     {
       value: "nine",
-      symbol: 9
+      symbol: "9"
     },
     {
       value: "zero",
-      symbol: 0
+      symbol: "0"
+    },
+    {
+      value: "decimal",
+      symbol: "."
     }
     ];
   const operations = [
@@ -74,10 +78,6 @@
     {
       op: "equals",
       symbol:"="
-    },
-    {
-      op: "decimal",
-      symbol: "."
     },
     {
       op: "clear",
@@ -140,7 +140,8 @@
       super(props)
       this.state={
         value: 0,
-        decimalMode: false,
+        numberMode: true,
+        decimalActive: false,
         equation:[],
         display: "Display"
       }
@@ -149,33 +150,44 @@
 
     updateEquation(val){
       var newEquation;
-      if(val == "CLR"){
-        this.setState({equation: [],decimalMode: false});
-      } else if (val == "."){
-          if (this.state.decimalMode == true){
-            console.log("error double decimal");
-          } else {
-            this.setState({decimalMode: true});
-            console.log("In decimal Mode")
-            // concatenate decimal with previous
-          }
-      } else if (this.state.decimalMode == true){
-          if (this.state.equation.length == 0){
-            newEquation = ["0."];
-            this.setState({equation: newEquation})
-          } else {
-            newEquation = [...this.state.equation];
-            newEquation[newEquation.length - 1 ] = newEquation[newEquation.length-1] + val;
-            this.setState({equation: newEquation})
-          }
-      } else {
-        newEquation = [...this.state.equation, val];
-        this.setState({equation: newEquation});
+      if (digits.some(digit => digit['symbol'] == val)){
+
+      }
+      if (operations.some(operation => operation['symbol'] == val)){
+        if(val == 'CLR'){
+          //reset state
+          this.setState({value: 0, numberMode: true, decimalActive: false, equation:[], display:"Display"})
+        }
       }
 
 
 
 
+      /*else if (val == "."){
+        if (this.state.decimalMode == true){
+          console.log("error double decimal");
+        } else {
+          this.setState({decimalMode: true});
+          console.log("In decimal Mode")
+          // concatenate decimal with previous
+          if (this.state.equation.length == 0 || !(/\d/.test(this.state.equation[this.state.equation.length-1]))){
+            newEquation = [...this.state.equation,"0."];
+            this.setState({equation: newEquation});
+          } else {
+            newEquation = [...this.state.equation];
+            newEquation[newEquation.length - 1 ] = newEquation[newEquation.length-1] + val;
+            this.setState({equation: newEquation});
+          }
+        }
+      } else if (this.state.decimalMode == true && !(/[+-/*]/.test(val))){
+        newEquation = [...this.state.equation];
+        newEquation[newEquation.length - 1 ] = newEquation[newEquation.length-1] + val;
+        this.setState({equation: newEquation})
+      } else {
+        this.setState({decimalMode: false})
+        newEquation = [...this.state.equation, val];
+        this.setState({equation: newEquation});
+      }*/
 
       /*else{
         if (val == "." || this.state.decimalMode == true){
