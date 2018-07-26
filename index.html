@@ -12,7 +12,6 @@
 
 <script type="text/babel">
 
-  var decimalMode = false;
   const digits = [
     {
       value: "one",
@@ -141,6 +140,7 @@
       super(props)
       this.state={
         value: 0,
+        decimalMode: false,
         equation:[],
         display: "Display"
       }
@@ -150,14 +150,46 @@
     updateEquation(val){
       var newEquation;
       if(val == "CLR"){
-        this.setState({equation: []});
-      }else{
-        if (val == "."){
-          decimalMode = true;
-        }
+        this.setState({equation: [],decimalMode: false});
+      } else if (val == "."){
+          if (this.state.decimalMode == true){
+            console.log("error double decimal");
+          } else {
+            this.setState({decimalMode: true});
+            console.log("In decimal Mode")
+            // concatenate decimal with previous
+          }
+      } else if (this.state.decimalMode == true){
+          if (this.state.equation.length == 0){
+            newEquation = ["0."];
+            this.setState({equation: newEquation})
+          } else {
+            newEquation = [...this.state.equation];
+            newEquation[newEquation.length - 1 ] = newEquation[newEquation.length-1] + val;
+            this.setState({equation: newEquation})
+          }
+      } else {
         newEquation = [...this.state.equation, val];
         this.setState({equation: newEquation});
       }
+
+
+
+
+
+      /*else{
+        if (val == "." || this.state.decimalMode == true){
+          this.setState({decimalMode: true})
+          newEquation = [...this.state.equation];
+          newEquation[newEquation.length - 1 ] = newEquation[newEquation.length-1] + val;
+          this.setState({equation: newEquation})
+        } else if (this.state.decimalMode == true && val != /[\d]/){
+          this.setState({decimalMode: false})
+        } else {
+          newEquation = [...this.state.equation, val];
+          this.setState({equation: newEquation});
+        }
+      }*/
     }
 
     render(){
