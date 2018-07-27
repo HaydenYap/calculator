@@ -2,10 +2,13 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.4.2/react.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/react/15.4.2/react-dom.js"></script>
   <script src="http://code.jquery.com/jquery-1.7.1.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/redux/4.0.0/redux.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/redux/4.0.0/redux.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-redux/5.0.7/react-redux.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/react-redux/5.0.7/react-redux.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.0/jquery-ui.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.21.1/babel.min.js"></script>
-  <link rel="stylesheet" href="css/style.css">
 </head>
 
 <div id="root"></div>
@@ -85,121 +88,206 @@ const operations = [
   }
 ];
 
-class NumberPad extends React.Component{
-  constructor(props){
-    super(props);
-    this.handleNumClick = this.handleNumClick.bind(this);
-  }
+  // Redux
+  const CLEAR = 'CLEAR';
+  const EQUAL = 'EQUAL'
+  const DIGIT = 'DIGIT';
+  const OPERATION = 'OPERATION';
 
-  handleNumClick(event){
-    this.props.updateEq(event.target.value);
-  }
-
-  render(){
-    const pad = digits.map(function(digit){
-      return(
-        <button className="padButton" id={digit.value} key={digit.value} onClick={this.handleNumClick} value={digit.symbol}>{digit.symbol}</button>
-      )
-    },this);
-
-    return(
-      <div id="numberPad">
-        {pad}
-      </div>
-    )
-  }
-}
-
-class OperationPad extends React.Component{
-  constructor(props){
-    super(props);
-    this.handleOpClick=this.handleOpClick.bind(this);
-  }
-
-  handleOpClick(event){
-    this.props.updateEq(event.target.value);
-  }
-
-  render(){
-    const pad = operations.map(function(operation){
-      return(
-        <button className="padButton" id={operation.op} key={operation.op} onClick={this.handleOpClick} value= {operation.symbol}>{operation.symbol}</button>
-      )
-    },this);
-
-    return(
-      <div id="operationPad">
-        {pad}
-      </div>
-    )
-  }
-}
-
-class Root extends React.Component{
-  constructor(props){
-    super(props)
-    this.state={
-      value: 0,
-      decimalActive: false,
-      equation:[],
-      display: "Display"
+  const addSymbol = (symbol) => {
+    if (symbol == "CLR"){
+      return {
+        type: CLEAR,
+        symbol: symbol
+      }
+    } else if (symbol == "="){
+      return{
+        type: EQUAL,
+        symbol: symbol
+      }
+    } else if (digits.some(digit => digit['symbol'] == symbol)){
+      return {
+        type: DIGIT,
+        symbol: symbol
+      }
+    } else {
+      return {
+        type: OPERATION,
+        symbol: symbol
+      }
     }
-    this.updateEquation = this.updateEquation.bind(this);
-  }
+  };
 
-  updateEquation(val){
-    var newEquation = [];
-    if (digits.some(digit => digit['symbol'] == val)){
-      if(this.state.equation.length == 0){
-        if (val == "."){
-          this.setState({equation: ["."], decimalActive: true})
-        } else {
-          this.setState({equation: [val]})
-        }
-      } else {
-        if ((val == "." && this.state.decimalActive == false) || val != "."){
-          if (val =="."){
-            this.setState({decimalActive: true});
+  const symbolReducer = (state = [], action) => {
+    var newState = [...state];
+    switch (action.type) {
+      case CLEAR:
+        return [];
+      case EQUAL:
+          // calculate state
+          const plusMinus = (op, index) =>{
+            if (op == "+"){
+              return parseFloat(newState[index-1]) + parseFloat(newState[index+1]);
+            } else {
+              return parseFloat(newState[index-1]) - parseFloat(newState[index+1]);
+            }
           }
-          newEquation = [...this.state.equation];
-          newEquation[newEquation.length - 1] = newEquation[newEquation.length - 1] + val;
-          this.setState({equation: newEquation});
+          const multDiv = (op, index) =>{
+            if (op == "*"){
+              return parseFloat(newState[index-1]) * parseFloat(newState[index+1]);
+            }
+            if (op == "/"){
+              return parseFloat(newState[index-1]) / parseFloat(newState[index+1]);
+            }
+          }
+
+          while(newState.length != 1){
+            if (newState.length % 2 == 0){
+              console.log("incomplete Equation")
+              return state
+            }
+            if (newState[1] == "+" || newState[1] == "-"){
+              if (newState[3] == "*" || newState[3] == "/"){
+                newState.splice(2,3, multDiv(newState[3],3).toString())
+              } else {
+                newState.splice(0,3, plusMinus(newState[1],1).toString())
+              }
+            } else {
+              newState.splice(0,3, multDiv(newState[1],1).toString())
+            }
+          }
+          return newState
+      case DIGIT:
+        if (newState.length == 0){
+          newState = [...state, action.symbol];
+        } else {
+          newState[newState.length - 1] = newState[newState.length - 1] + action.symbol;
         }
-      }
+        return newState;
+      case OPERATION:
+          if (newState.length == 0){
+            console.log("Error " + action.symbol + " must be after a number.")
+          } else {
+            newState.push(action.symbol);
+            newState.push("")
+          }
+          return newState;
+      default:
+        return state;
     }
-    if (operations.some(operation => operation['symbol'] == val)){
-      if(val == 'CLR'){
-        //reset state
-        this.setState({value: 0, decimalActive: false, equation:[], display:"Display"})
-      } else {
-        newEquation = [...this.state.equation,val,""];
-        this.setState({equation: newEquation, decimalActive: false});
-      }
-    }
-  }
+  };
 
-  render(){
-    console.log(this.state.equation)
-    return (
-      <div id="calculator">
-        <div id="display">{this.state.display}</div>
-        <div id="pad">
-          <NumberPad updateEq={this.updateEquation}/>
-          <OperationPad updateEq={this.updateEquation}/>
+  const store = Redux.createStore(symbolReducer);
+
+  class NumberPad extends React.Component{
+    constructor(props){
+      super(props);
+      this.handleNumClick = this.handleNumClick.bind(this);
+    }
+
+    handleNumClick(event){
+      this.props.updateSymbol(event.target.value);
+    }
+
+    render(){
+      const pad = digits.map(function(digit){
+        return(
+          <button className="padButton" id={digit.value} key={digit.value} onClick={this.handleNumClick} value={digit.symbol}>{digit.symbol}</button>
+        )
+      },this);
+
+      return(
+        <div id="numberPad">
+          {pad}
         </div>
-      </div>
-    )
+      )
+    }
   }
-}
 
-ReactDOM.render(<Root />, document.getElementById('root'))
+  class OperationPad extends React.Component{
+    constructor(props){
+      super(props);
+      this.handleOpClick=this.handleOpClick.bind(this);
+    }
 
-//logic in words?
-/*
-  put all ops and numbers into an array.
-  format array into proper format i.e..
-  see clr or = means evaluate
-  see decimal(.) means combine natural numbers to form a real one.
+    handleOpClick(event){
+      this.props.updateSymbol(event.target.value);
+    }
 
-*/
+    render(){
+      const pad = operations.map(function(operation){
+        return(
+          <button className="padButton" id={operation.op} key={operation.op} onClick={this.handleOpClick} value= {operation.symbol}>{operation.symbol}</button>
+        )
+      },this);
+
+      return(
+        <div id="operationPad">
+          {pad}
+        </div>
+      )
+    }
+  }
+
+  class Root extends React.Component{
+    constructor(props){
+      super(props)
+      this.submitSymbol = this.submitSymbol.bind(this);
+    }
+
+    submitSymbol(val){
+      this.props.submitNewSymbol(val);
+    }
+
+    render(){
+      console.log(store.getState())
+      return (
+        <div id="calculator">
+          <div id="display">{store.getState()}</div>
+          <div id="pad">
+            <NumberPad updateSymbol={this.submitSymbol}/>
+            <OperationPad updateSymbol={this.submitSymbol}/>
+          </div>
+        </div>
+      )
+    }
+  }
+
+  const mapStateToProps = (state) => {
+    return {symbols: state}
+  };
+
+  const mapDispatchToProps = (dispatch) => {
+    return {
+      submitNewSymbol: (symbol) => {
+        dispatch(addSymbol(symbol))
+      }
+    }
+  };
+
+  const Provider = ReactRedux.Provider;
+  const connect = ReactRedux.connect;
+
+  const Container = connect(mapStateToProps, mapDispatchToProps)(Root);
+
+  class AppWrapper extends React.Component {
+    render() {
+      return (
+        <Provider store={store}>
+          <Container/>
+        </Provider>
+      );
+    }
+  };
+
+  //logic in words?
+  /*
+    put all ops and numbers into an array.
+    format array into proper format i.e..
+    see clr or = means evaluate
+    see decimal(.) means combine natural numbers to form a real one.
+
+  */
+
+  ReactDOM.render(<AppWrapper />, document.getElementById('root'))
 </script>
