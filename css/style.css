@@ -3,18 +3,7 @@
   padding: 0;
 }
 
-body{
-  height: 100%;
-  width: 100%;
-}
-
-#calculator{
-  display: flex;
-  flex-direction: column;
-  background-color: pink;
-}
-
-#pad{
+.row{
   display: flex;
   flex-direction: row;
 }
