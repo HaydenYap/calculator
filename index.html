@@ -12,200 +12,194 @@
 
 <script type="text/babel">
 
-  const digits = [
-    {
-      value: "one",
-      symbol: 1
-    },
-    {
-      value: "two",
-      symbol: "2"
-    },
-    {
-      value: "three",
-      symbol: "3"
-    },
-    {
-      value: "four",
-      symbol: "4"
-    },
-    {
-      value: "five",
-      symbol: "5"
-    },
-    {
-      value: "six",
-      symbol: "6"
-    },
-    {
-      value: "seven",
-      symbol: "7"
-    },
-    {
-      value: "eight",
-      symbol: "8"
-    },
-    {
-      value: "nine",
-      symbol: "9"
-    },
-    {
-      value: "zero",
-      symbol: "0"
-    },
-    {
-      value: "decimal",
-      symbol: "."
-    }
-    ];
-  const operations = [
-    {
-      op: "add",
-      symbol: "+"
-    },
-    {
-      op: "subtract",
-      symbol: "-"
-    },
-    {
-      op: "multiply",
-      symbol: "*"
-    },
-    {
-      op: "divide",
-      symbol: "/"
-    },
-    {
-      op: "equals",
-      symbol:"="
-    },
-    {
-      op: "clear",
-      symbol: "CLR"
-    }
+const digits = [
+  {
+    value: "one",
+    symbol: 1
+  },
+  {
+    value: "two",
+    symbol: "2"
+  },
+  {
+    value: "three",
+    symbol: "3"
+  },
+  {
+    value: "four",
+    symbol: "4"
+  },
+  {
+    value: "five",
+    symbol: "5"
+  },
+  {
+    value: "six",
+    symbol: "6"
+  },
+  {
+    value: "seven",
+    symbol: "7"
+  },
+  {
+    value: "eight",
+    symbol: "8"
+  },
+  {
+    value: "nine",
+    symbol: "9"
+  },
+  {
+    value: "zero",
+    symbol: "0"
+  },
+  {
+    value: "decimal",
+    symbol: "."
+  }
   ];
+const operations = [
+  {
+    op: "add",
+    symbol: "+"
+  },
+  {
+    op: "subtract",
+    symbol: "-"
+  },
+  {
+    op: "multiply",
+    symbol: "*"
+  },
+  {
+    op: "divide",
+    symbol: "/"
+  },
+  {
+    op: "equals",
+    symbol:"="
+  },
+  {
+    op: "clear",
+    symbol: "CLR"
+  }
+];
 
-  class NumberPad extends React.Component{
-    constructor(props){
-      super(props);
-      this.handleNumClick = this.handleNumClick.bind(this);
-    }
-
-    handleNumClick(event){
-      this.props.updateEq(event.target.value);
-      this.props.updateDisc();
-    }
-
-    render(){
-      const pad = digits.map(function(digit){
-        return(
-          <button className="padButton" id={digit.value} key={digit.value} onClick={this.handleNumClick} value={digit.symbol}>{digit.symbol}</button>
-        )
-      },this);
-
-      return(
-        <div id="numberPad">
-          {pad}
-        </div>
-      )
-    }
+class NumberPad extends React.Component{
+  constructor(props){
+    super(props);
+    this.handleNumClick = this.handleNumClick.bind(this);
   }
 
-  class OperationPad extends React.Component{
-    constructor(props){
-      super(props);
-      this.handleOpClick=this.handleOpClick.bind(this);
-    }
-
-    handleOpClick(event){
-      this.props.updateEq(event.target.value);
-      this.props.updateDisc();
-    }
-
-    render(){
-      const pad = operations.map(function(operation){
-        return(
-          <button className="padButton" id={operation.op} key={operation.op} onClick={this.handleOpClick} value= {operation.symbol}>{operation.symbol}</button>
-        )
-      },this);
-
-      return(
-        <div id="operationPad">
-          {pad}
-        </div>
-      )
-    }
+  handleNumClick(event){
+    this.props.updateEq(event.target.value);
   }
 
-  class Root extends React.Component{
-    constructor(props){
-      super(props)
-      this.state={
-        value: 0,
-        decimalActive: false,
-        equation:[],
-        display: "Display"
-      }
-      this.updateEquation = this.updateEquation.bind(this);
-      this.updateDisplay = this.updateDisplay.bind(this);
-    }
+  render(){
+    const pad = digits.map(function(digit){
+      return(
+        <button className="padButton" id={digit.value} key={digit.value} onClick={this.handleNumClick} value={digit.symbol}>{digit.symbol}</button>
+      )
+    },this);
 
-    updateEquation(val){
-      var newEquation = [];
-      if (digits.some(digit => digit['symbol'] == val)){
-        if(this.state.equation.length == 0){
-          if (val == "."){
-            this.setState({equation: ["."], decimalActive: true})
-          } else {
-            this.setState({equation: [val]})
-          }
+    return(
+      <div id="numberPad">
+        {pad}
+      </div>
+    )
+  }
+}
+
+class OperationPad extends React.Component{
+  constructor(props){
+    super(props);
+    this.handleOpClick=this.handleOpClick.bind(this);
+  }
+
+  handleOpClick(event){
+    this.props.updateEq(event.target.value);
+  }
+
+  render(){
+    const pad = operations.map(function(operation){
+      return(
+        <button className="padButton" id={operation.op} key={operation.op} onClick={this.handleOpClick} value= {operation.symbol}>{operation.symbol}</button>
+      )
+    },this);
+
+    return(
+      <div id="operationPad">
+        {pad}
+      </div>
+    )
+  }
+}
+
+class Root extends React.Component{
+  constructor(props){
+    super(props)
+    this.state={
+      value: 0,
+      decimalActive: false,
+      equation:[],
+      display: "Display"
+    }
+    this.updateEquation = this.updateEquation.bind(this);
+  }
+
+  updateEquation(val){
+    var newEquation = [];
+    if (digits.some(digit => digit['symbol'] == val)){
+      if(this.state.equation.length == 0){
+        if (val == "."){
+          this.setState({equation: ["."], decimalActive: true})
         } else {
-          if ((val == "." && this.state.decimalActive == false) || val != "."){
-            if (val =="."){
-              this.setState({decimalActive: true});
-            }
-            newEquation = [...this.state.equation];
-            newEquation[newEquation.length - 1] = newEquation[newEquation.length - 1] + val;
-            this.setState({equation: newEquation})
+          this.setState({equation: [val]})
+        }
+      } else {
+        if ((val == "." && this.state.decimalActive == false) || val != "."){
+          if (val =="."){
+            this.setState({decimalActive: true});
           }
+          newEquation = [...this.state.equation];
+          newEquation[newEquation.length - 1] = newEquation[newEquation.length - 1] + val;
+          this.setState({equation: newEquation});
         }
       }
-      if (operations.some(operation => operation['symbol'] == val)){
-        if(val == 'CLR'){
-          //reset state
-          this.setState({value: 0, decimalActive: false, equation:[], display:"Display"})
-        } else {
-          newEquation = [...this.state.equation,val,""];
-          this.setState({equation: newEquation, decimalActive: false});
-        }
+    }
+    if (operations.some(operation => operation['symbol'] == val)){
+      if(val == 'CLR'){
+        //reset state
+        this.setState({value: 0, decimalActive: false, equation:[], display:"Display"})
+      } else {
+        newEquation = [...this.state.equation,val,""];
+        this.setState({equation: newEquation, decimalActive: false});
       }
-    }
-
-    updateDisplay(){
-      this.setState({display: this.state.equation.join(" ")})
-    }
-
-    render(){
-      return (
-        <div id="calculator">
-          <div id="display">{this.state.display}</div>
-          <div id="pad">
-            <NumberPad updateEq={this.updateEquation} updateDisc={this.updateDisplay}/>
-            <OperationPad updateEq={this.updateEquation} updateDisc={this.updateDisplay}/>
-          </div>
-        </div>
-      )
     }
   }
 
-  ReactDOM.render(<Root />, document.getElementById('root'))
+  render(){
+    console.log(this.state.equation)
+    return (
+      <div id="calculator">
+        <div id="display">{this.state.display}</div>
+        <div id="pad">
+          <NumberPad updateEq={this.updateEquation}/>
+          <OperationPad updateEq={this.updateEquation}/>
+        </div>
+      </div>
+    )
+  }
+}
 
-  //logic in words?
-  /*
-    put all ops and numbers into an array.
-    format array into proper format i.e..
-    see clr or = means evaluate
-    see decimal(.) means combine natural numbers to form a real one.
+ReactDOM.render(<Root />, document.getElementById('root'))
 
-  */
+//logic in words?
+/*
+  put all ops and numbers into an array.
+  format array into proper format i.e..
+  see clr or = means evaluate
+  see decimal(.) means combine natural numbers to form a real one.
+
+*/
 </script>
