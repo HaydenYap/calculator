@@ -194,7 +194,6 @@
     render(){
       const row = (rowContent) =>{
         var size = "col-md-" + (12/rowContent.length);
-        console.log(size);
         return rowContent.map(function(digit){
           return(
             <div className={size} key={digit.value}>
@@ -203,12 +202,24 @@
           )
         },this);
       }
-      const row1 = row(digits.slice(0,3))
+      const row1 = row(digits.slice(8,11))
+      const row2 = row(digits.slice(5,8))
+      const row3 = row(digits.slice(2,5))
+      const row4 = row(digits.slice(0,2))
 
       return(
         <div id="numberPad">
           <div className="row">
             {row1}
+          </div>
+          <div className="row">
+            {row2}
+          </div>
+          <div className="row">
+            {row3}
+          </div>
+          <div className="row">
+            {row4}
           </div>
         </div>
       )
@@ -256,8 +267,14 @@
         <div id="calculator" className="container">
           <div id="display" className="col-xl-12">{store.getState()}</div>
           <div id="pad" className="container">
-            <NumberPad updateSymbol={this.submitSymbol}/>
-            <OperationPad updateSymbol={this.submitSymbol}/>
+            <div className="row">
+              <div className="col-xl-9">
+                <NumberPad updateSymbol={this.submitSymbol}/>
+              </div>
+              <div className="col-xl-3">
+                <OperationPad updateSymbol={this.submitSymbol}/>
+              </div>
+            </div>
           </div>
         </div>
       )
