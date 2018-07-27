@@ -8,7 +8,7 @@
   <link rel="stylesheet" href="css/style.css">
 </head>
 
-<div id="app"></div>
+<div id="root"></div>
 
 <script type="text/babel">
 
@@ -93,6 +93,7 @@
 
     handleNumClick(event){
       this.props.updateEq(event.target.value);
+      this.props.updateDisc();
     }
 
     render(){
@@ -117,7 +118,8 @@
     }
 
     handleOpClick(event){
-      this.props.updateEq(event.target.value)
+      this.props.updateEq(event.target.value);
+      this.props.updateDisc();
     }
 
     render(){
@@ -135,90 +137,68 @@
     }
   }
 
-  class App extends React.Component{
+  class Root extends React.Component{
     constructor(props){
       super(props)
       this.state={
         value: 0,
-        numberMode: true,
         decimalActive: false,
         equation:[],
         display: "Display"
       }
       this.updateEquation = this.updateEquation.bind(this);
+      this.updateDisplay = this.updateDisplay.bind(this);
     }
 
     updateEquation(val){
-      var newEquation;
+      var newEquation = [];
       if (digits.some(digit => digit['symbol'] == val)){
-
+        if(this.state.equation.length == 0){
+          if (val == "."){
+            this.setState({equation: ["."], decimalActive: true})
+          } else {
+            this.setState({equation: [val]})
+          }
+        } else {
+          if ((val == "." && this.state.decimalActive == false) || val != "."){
+            if (val =="."){
+              this.setState({decimalActive: true});
+            }
+            newEquation = [...this.state.equation];
+            newEquation[newEquation.length - 1] = newEquation[newEquation.length - 1] + val;
+            this.setState({equation: newEquation})
+          }
+        }
       }
       if (operations.some(operation => operation['symbol'] == val)){
         if(val == 'CLR'){
           //reset state
-          this.setState({value: 0, numberMode: true, decimalActive: false, equation:[], display:"Display"})
+          this.setState({value: 0, decimalActive: false, equation:[], display:"Display"})
+        } else {
+          newEquation = [...this.state.equation,val,""];
+          this.setState({equation: newEquation, decimalActive: false});
         }
       }
+    }
 
-
-
-
-      /*else if (val == "."){
-        if (this.state.decimalMode == true){
-          console.log("error double decimal");
-        } else {
-          this.setState({decimalMode: true});
-          console.log("In decimal Mode")
-          // concatenate decimal with previous
-          if (this.state.equation.length == 0 || !(/\d/.test(this.state.equation[this.state.equation.length-1]))){
-            newEquation = [...this.state.equation,"0."];
-            this.setState({equation: newEquation});
-          } else {
-            newEquation = [...this.state.equation];
-            newEquation[newEquation.length - 1 ] = newEquation[newEquation.length-1] + val;
-            this.setState({equation: newEquation});
-          }
-        }
-      } else if (this.state.decimalMode == true && !(/[+-/*]/.test(val))){
-        newEquation = [...this.state.equation];
-        newEquation[newEquation.length - 1 ] = newEquation[newEquation.length-1] + val;
-        this.setState({equation: newEquation})
-      } else {
-        this.setState({decimalMode: false})
-        newEquation = [...this.state.equation, val];
-        this.setState({equation: newEquation});
-      }*/
-
-      /*else{
-        if (val == "." || this.state.decimalMode == true){
-          this.setState({decimalMode: true})
-          newEquation = [...this.state.equation];
-          newEquation[newEquation.length - 1 ] = newEquation[newEquation.length-1] + val;
-          this.setState({equation: newEquation})
-        } else if (this.state.decimalMode == true && val != /[\d]/){
-          this.setState({decimalMode: false})
-        } else {
-          newEquation = [...this.state.equation, val];
-          this.setState({equation: newEquation});
-        }
-      }*/
+    updateDisplay(){
+      this.setState({display: this.state.equation.join(" ")})
     }
 
     render(){
-      console.log(this.state.equation);
       return (
         <div id="calculator">
           <div id="display">{this.state.display}</div>
           <div id="pad">
-            <NumberPad updateEq={this.updateEquation}/>
-            <OperationPad updateEq={this.updateEquation}/>
+            <NumberPad updateEq={this.updateEquation} updateDisc={this.updateDisplay}/>
+            <OperationPad updateEq={this.updateEquation} updateDisc={this.updateDisplay}/>
           </div>
         </div>
       )
     }
   }
 
-  ReactDOM.render(<App />, document.getElementById('app'))
+  ReactDOM.render(<Root />, document.getElementById('root'))
 
   //logic in words?
   /*
