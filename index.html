@@ -9,7 +9,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.0/jquery-ui.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.21.1/babel.min.js"></script>
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
   <link rel="stylesheet" href="css/style.css">
 </head>
 
@@ -86,7 +85,7 @@
   },
   {
     op: "clear",
-    symbol: "CLR"
+    symbol: "AC"
   }
 ];
 
@@ -97,7 +96,7 @@
   const OPERATION = 'OPERATION';
 
   const addSymbol = (symbol) => {
-    if (symbol == "CLR"){
+    if (symbol == "AC"){
       return {
         type: CLEAR,
         symbol: symbol
@@ -120,59 +119,78 @@
     }
   };
 
-  const symbolReducer = (state = [], action) => {
+  const symbolReducer = (state = [[0], {decimal: false, operator: false}], action) => {
     var newState = [...state];
+    if (newState[0].length == 1 && newState[0][0] == 0){
+      newState[0] = [];
+    }
     switch (action.type) {
       case CLEAR:
-        return [];
+          newState = [[0],{decimal: false, operator: false}];
+          return newState;
       case EQUAL:
           // calculate state
           const plusMinus = (op, index) =>{
             if (op == "+"){
-              return parseFloat(newState[index-1]) + parseFloat(newState[index+1]);
+              return parseFloat(newState[0][index-1]) + parseFloat(newState[0][index+1]);
             } else {
-              return parseFloat(newState[index-1]) - parseFloat(newState[index+1]);
+              return parseFloat(newState[0][index-1]) - parseFloat(newState[0][index+1]);
             }
           }
           const multDiv = (op, index) =>{
             if (op == "*"){
-              return parseFloat(newState[index-1]) * parseFloat(newState[index+1]);
+              return parseFloat(newState[0][index-1]) * parseFloat(newState[0][index+1]);
             }
             if (op == "/"){
-              return parseFloat(newState[index-1]) / parseFloat(newState[index+1]);
+              return parseFloat(newState[0][index-1]) / parseFloat(newState[0][index+1]);
             }
           }
 
-          while(newState.length != 1){
-            if (newState.length % 2 == 0){
+          while(newState[0].length != 1){
+            if (newState[0].length % 2 == 0){
               console.log("incomplete Equation")
               return state
             }
-            if (newState[1] == "+" || newState[1] == "-"){
-              if (newState[3] == "*" || newState[3] == "/"){
-                newState.splice(2,3, multDiv(newState[3],3).toString())
+            if (newState[0][1] == "+" || newState[0][1] == "-"){
+              if (newState[0][3] == "*" || newState[0][3] == "/"){
+                newState[0].splice(2,3, multDiv(newState[0][3],3).toString())
               } else {
-                newState.splice(0,3, plusMinus(newState[1],1).toString())
+                newState[0].splice(0,3, plusMinus(newState[0][1],1).toString())
               }
             } else {
-              newState.splice(0,3, multDiv(newState[1],1).toString())
+              newState[0].splice(0,3, multDiv(newState[0][1],1).toString())
             }
           }
+          newState[0][0] = parseFloat(newState[0][0]);
           return newState
       case DIGIT:
-        if (newState.length == 0){
-          newState = [...state, action.symbol];
-        } else {
-          newState[newState.length - 1] = newState[newState.length - 1] + action.symbol;
+        if (action.symbol == "."){
+          if (newState[1].decimal == false){
+            newState[1].decimal = true;
+            console.log("Cannot put more than 1 decimal")
+          } else {
+            return state;
+          }
         }
+        if (newState[0].length == 0){
+          newState[0] = [...newState[0], action.symbol];
+        } else {
+          newState[0][newState[0].length - 1] = newState[0][newState[0].length - 1] + action.symbol;
+        }
+        newState[1].operator = true;
         return newState;
       case OPERATION:
-          if (newState.length == 0){
+          if (newState[1].operator == false){
+            console.log("Operator change")
+            newState[0].splice(newState[0].length -2,2)
+          }
+          if (newState[0].length == 0){
             console.log("Error " + action.symbol + " must be after a number.")
           } else {
-            newState.push(action.symbol);
-            newState.push("")
+            newState[0].push(action.symbol);
+            newState[0].push("")
           }
+          newState[1] = {decimal: false, operator:false}
           return newState;
       default:
         return state;
@@ -196,9 +214,7 @@
         var elementClass = "padCasing col-xs-4"
         return rowContent.map(function(digit){
           return(
-            <div className={elementClass}  key={digit.value}>
-              <button className="padButton" id={digit.value} onClick={this.handleNumClick} value={digit.symbol}>{digit.symbol}</button>
-            </div>
+            <button className="padButton" id={digit.value} key={digit.value} onClick={this.handleNumClick} value={digit.symbol}>{digit.symbol}</button>
           )
         },this);
       }
@@ -238,12 +254,9 @@
 
     render(){
       const row = (rowContent) =>{
-        var elementClass = "padCasing col-xs-4"
         return rowContent.map(function(op){
           return(
-            <div className={elementClass}  key={op.op}>
-              <button className="padButton" id={op.op} onClick={this.handleOpClick} value={op.symbol}>{op.symbol}</button>
-            </div>
+              <button className="padButton" id={op.op} key={op.op} onClick={this.handleOpClick} value={op.symbol}>{op.symbol}</button>
           )
         },this);
       }
@@ -255,15 +268,15 @@
       return(
         <div id="operationPad">
           <div className="row">
-            <div className="col-xs-4"/>
+            <div className="padButton"/>
             {row1}
           </div>
           <div className="row">
-            <div className="col-xs-4"/>
+            <div className="padButton"/>
             {row2}
           </div>
           <div className="row">
-            <div className="col-xs-4"/>
+            <div className="padButton"/>
             {row3}
           </div>
         </div>
@@ -286,22 +299,12 @@
       return (
         <div id="calculator" className="container">
           <div className="row">
-            <div id="display" className="col-xs-12 ">
-              <div id="value">
-                {store.getState()}
-              </div>
-            </div>
+            <div id="display">{store.getState()[0].join("")}</div>
           </div>
           <div className="row">
-              <div id="pad" className="col-xs-12">
-              <div className="row">
-                <div className="col-xs-6">
-                  <NumberPad updateSymbol={this.submitSymbol}/>
-                </div>
-                <div className="col-xs-6">
-                  <OperationPad updateSymbol={this.submitSymbol}/>
-                </div>
-              </div>
+            <div id="pad">
+                <NumberPad updateSymbol={this.submitSymbol}/>
+                <OperationPad updateSymbol={this.submitSymbol}/>
             </div>
           </div>
         </div>
